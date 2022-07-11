@@ -14,6 +14,7 @@ This tools analyse security headers based on OWASP Secure Headers Project,
 -n, --nologo                 don't print banner
 -u, --url=URL                set target URL (not mandatory if url is last
                              parameter)
+-k, --insecure               Ignore certificat issues
 -U, --user-agent=USER-AGENT  set user-agent
 -p, --post=POST-DATA         set post data (will use POST instead of GET)
 -c, --cookies=COOKIES        set cookies

@@ -2,15 +2,18 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/mmpx12/optionparser"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mmpx12/optionparser"
 )
 
-const version = "Version 0.1 (02-08-2021)"
+const version = "Version 0.2 (07-11-2022)"
 
 type header struct {
 	name        string
@@ -83,7 +86,7 @@ var headers = []header{
 	header{
 		name:        "Expect-Ct",
 		description: "The Expect-CT header is used by a server to indicate that browsers should evaluate connections to the host for Certificate Transparency compliance.",
-		deprecated:  2,
+		deprecated:  1,
 	},
 	header{
 		name:        "Public-Key-Pins",
@@ -150,8 +153,15 @@ func print_version() {
 	os.Exit(0)
 }
 
-func request(url, cookies, UserAgent, post string) http.Header {
-	client := &http.Client{}
+func request(url, cookies, UserAgent, post string, insecure bool) http.Header {
+	var client *http.Client
+	if insecure {
+		customTransport := http.DefaultTransport.(*http.Transport).Clone()
+		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client = &http.Client{Transport: customTransport}
+	} else {
+		client = &http.Client{}
+	}
 	ctx, cncl := context.WithTimeout(context.Background(), time.Second*5)
 	defer cncl()
 	var req *http.Request
@@ -173,22 +183,27 @@ func request(url, cookies, UserAgent, post string) http.Header {
 	}
 
 	resp, err := client.Do(req)
+
 	if err != nil {
-		error := err.Error()
-		fmt.Println("\033[31mERROR:\033[33m\n" + error + "\033[0m")
+		fmt.Println("\033[31m[!] ERROR: \n\033[33m" + err.Error() + "\033[0m")
+		os.Exit(1)
+	}
+	if resp.StatusCode != 200 {
+		fmt.Println("\033[31m[!] ERROR " + strconv.Itoa(resp.StatusCode) + "\033[0m")
 		os.Exit(1)
 	}
 	return resp.Header
 }
 
 func main() {
-	var nologo, description bool
+	var nologo, description, insecure bool
 	var url, UserAgent, post, cookies string
 	op := optionparser.NewOptionParser()
 	op.Banner = "Headsek: Security header analyzer\n\nUsage:\n"
 	op.On("-d", "--description", "Print description under the result", &description)
 	op.On("-n", "--nologo", "don't print banner", &nologo)
-	op.On("-u", "--url URL", "set target URL (not mandatory if url is last parameter)", &url)
+	op.On("-k", "--insecure", "Ignore certificats issues", &insecure)
+	op.On("-u", "--url URL", "set target URL (not mandatory if url is the last parameter)", &url)
 	op.On("-U", "--user-agent USER-AGENT", "set user-agent", &UserAgent)
 	op.On("-p", "--post POST-DATA", "set post data (will use POST instead of GET)", &post)
 	op.On("-c", "--cookies COOKIES", "set cookies", &cookies)
@@ -196,6 +211,7 @@ func main() {
 	op.Exemple("# GET request\n      headsek -n -u https://exemple.com")
 	op.Exemple("# POST request:\n      headsek -n -p \"whatever=1&somethingelse=yes\" https://exemple.com")
 	op.Exemple("# Set cookie and user-agent\n      headsek -n -c \"sessionid=something;userid=1\" -U \"some user-agent\" https://exemple.com")
+	op.Exemple("\nFor more info about security headers check https://owasp.org/www-project-secure-headers/")
 	op.Parse()
 	op.Logo("headsek", "random", nologo)
 	if strings.Join(op.Extra, "") != "" {
@@ -210,7 +226,7 @@ func main() {
 		url = "http://" + url
 	}
 
-	resp := request(url, cookies, UserAgent, post)
+	resp := request(url, cookies, UserAgent, post, insecure)
 	for _, j := range headers {
 		check_header(resp, j, description)
 	}
