@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/mmpx12/optionparser"
 )
 
-const version = "Version 0.2 (07-11-2022)"
+const version = "Version 0.3 (07-19-2022)"
 
 type header struct {
 	name        string
@@ -153,7 +154,7 @@ func print_version() {
 	os.Exit(0)
 }
 
-func request(url, cookies, UserAgent, post string, insecure bool) http.Header {
+func request(url, cookies, headers, UserAgent, post string, insecure bool) http.Header {
 	var client *http.Client
 	if insecure {
 		customTransport := http.DefaultTransport.(*http.Transport).Clone()
@@ -182,6 +183,11 @@ func request(url, cookies, UserAgent, post string, insecure bool) http.Header {
 		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36")
 	}
 
+	if headers != "" {
+		delimiter := regexp.MustCompile(`:`)
+		req.Header.Add(delimiter.Split(headers, 2)[0], delimiter.Split(headers, 2)[1])
+	}
+
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -197,7 +203,7 @@ func request(url, cookies, UserAgent, post string, insecure bool) http.Header {
 
 func main() {
 	var nologo, description, insecure bool
-	var url, UserAgent, post, cookies string
+	var url, header, UserAgent, post, cookies string
 	op := optionparser.NewOptionParser()
 	op.Banner = "Headsek: Security header analyzer\n\nUsage:\n"
 	op.On("-d", "--description", "Print description under the result", &description)
@@ -207,10 +213,12 @@ func main() {
 	op.On("-U", "--user-agent USER-AGENT", "set user-agent", &UserAgent)
 	op.On("-p", "--post POST-DATA", "set post data (will use POST instead of GET)", &post)
 	op.On("-c", "--cookies COOKIES", "set cookies", &cookies)
+	op.On("-H", "--headers 'NAME:VALUE'", "set headers", &header)
 	op.On("-v", "--version", "show version", print_version)
 	op.Exemple("# GET request\n      headsek -n -u https://exemple.com")
 	op.Exemple("# POST request:\n      headsek -n -p \"whatever=1&somethingelse=yes\" https://exemple.com")
 	op.Exemple("# Set cookie and user-agent\n      headsek -n -c \"sessionid=something;userid=1\" -U \"some user-agent\" https://exemple.com")
+	op.Exemple("# Set custom header for request (usefull for api)\n     headsek -k -n -H 'Authorization: Token XXXXXXXXXXXXX' https://exemple.com")
 	op.Exemple("\nFor more info about security headers check https://owasp.org/www-project-secure-headers/")
 	op.Parse()
 	op.Logo("headsek", "random", nologo)
@@ -226,7 +234,7 @@ func main() {
 		url = "http://" + url
 	}
 
-	resp := request(url, cookies, UserAgent, post, insecure)
+	resp := request(url, cookies, header, UserAgent, post, insecure)
 	for _, j := range headers {
 		check_header(resp, j, description)
 	}
