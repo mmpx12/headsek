@@ -14,7 +14,7 @@ import (
 	"github.com/mmpx12/optionparser"
 )
 
-const version = "Version 0.4 (09-21-2022)"
+const version = "Version 0.5 (09-21-2022)"
 
 type header struct {
 	name        string
@@ -75,11 +75,6 @@ var headers = []header{
 		deprecated:  0,
 	},
 	header{
-		name:        "Clear-Site-Data",
-		description: "The Clear-Site-Data header clears browsing data (cookies, storage, cache) associated with the requesting website. It allows web developers to have more control over the data stored locally by a browser for their origins (source Mozilla MDN). This header is useful for example, during a logout process, in order to ensure that all stored content on the client side like cookies, storage and cache are removed.",
-		deprecated:  0,
-	},
-	header{
 		name:        "Cross-Origin-Opener-Policy",
 		surname:     "COOP",
 		description: "This response header (also named COOP) allows you to ensure a top-level document does not share a browsing context group with cross-origin documents. COOP will process-isolate your document and potential attackers can’t access to your global object if they were opening it in a popup, preventing a set of cross-origin attacks dubbed XS-Leaks (source Mozilla MDN).",
@@ -92,12 +87,12 @@ var headers = []header{
 	},
 	header{
 		name:        "Permissions-Policy",
-		description: "Replaces the existing Feature-Policy header for controlling delegation of permissions and powerful features. The header uses a structured syntax, and allows sites to more tightly restrict which origins can be granted access to features",
-		deprecated:  1,
+		description: "The Permissions-Policy header replaces the existing Feature-Policy header for controlling delegation of permissions and powerful features. The header uses a structured syntax, and allows sites to more tightly restrict which origins can be granted access to features (source Chrome platform status).",
+		deprecated:  0,
 	},
 	header{
 		name:        "Feature-Policy",
-		description: "This header was split into Permissions-Policy and Document-Policy and will be considered deprecated once all impacted features are moved off of feature policy.\nAllows developers to selectively enable and disable use of various browser features and APIs.",
+		description: "Deprecated: Replaced by the header Permissions-Policy.Feature Policy allows web developers to selectively enable, disable, and modify the behavior of certain features and APIs in the browser. It is similar to Content Security Policy but controls features instead of security behavior.",
 		deprecated:  1,
 	},
 	header{
