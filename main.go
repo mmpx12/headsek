@@ -14,7 +14,7 @@ import (
 	"github.com/mmpx12/optionparser"
 )
 
-const version = "Version 0.3 (07-19-2022)"
+const version = "Version 0.4 (09-21-2022)"
 
 type header struct {
 	name        string
@@ -75,14 +75,30 @@ var headers = []header{
 		deprecated:  0,
 	},
 	header{
+		name:        "Clear-Site-Data",
+		description: "The Clear-Site-Data header clears browsing data (cookies, storage, cache) associated with the requesting website. It allows web developers to have more control over the data stored locally by a browser for their origins (source Mozilla MDN). This header is useful for example, during a logout process, in order to ensure that all stored content on the client side like cookies, storage and cache are removed.",
+		deprecated:  0,
+	},
+	header{
+		name:        "Cross-Origin-Opener-Policy",
+		surname:     "COOP",
+		description: "This response header (also named COOP) allows you to ensure a top-level document does not share a browsing context group with cross-origin documents. COOP will process-isolate your document and potential attackers can’t access to your global object if they were opening it in a popup, preventing a set of cross-origin attacks dubbed XS-Leaks (source Mozilla MDN).",
+		deprecated:  0,
+	},
+	header{
+		name:        "Cache-Control",
+		description: "This header holds directives (instructions) for caching in both requests and responses. If a given directive is in a request, it does not mean this directive is in the response (source Mozilla MDN). Specify the capability of a resource to be cached is important to prevent exposure of information via the cache.",
+		deprecated:  0,
+	},
+	header{
 		name:        "Permissions-Policy",
 		description: "Replaces the existing Feature-Policy header for controlling delegation of permissions and powerful features. The header uses a structured syntax, and allows sites to more tightly restrict which origins can be granted access to features",
-		deprecated:  0,
+		deprecated:  1,
 	},
 	header{
 		name:        "Feature-Policy",
 		description: "This header was split into Permissions-Policy and Document-Policy and will be considered deprecated once all impacted features are moved off of feature policy.\nAllows developers to selectively enable and disable use of various browser features and APIs.",
-		deprecated:  2,
+		deprecated:  1,
 	},
 	header{
 		name:        "Expect-Ct",
