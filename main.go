@@ -182,13 +182,17 @@ func request(url, cookies, headers, UserAgent, post string, insecure bool) http.
 	ctx, cncl := context.WithTimeout(context.Background(), time.Second*5)
 	defer cncl()
 	var req *http.Request
+	var err error
 	if post != "" {
 		PostData := strings.NewReader(post)
-		req, _ = http.NewRequestWithContext(ctx, "POST", url, PostData)
+		req, err = http.NewRequestWithContext(ctx, "POST", url, PostData)
 	} else {
-		req, _ = http.NewRequestWithContext(ctx, "GET", url, nil)
+		req, err = http.NewRequestWithContext(ctx, "GET", url, nil)
 	}
-
+	if err != nil {
+		fmt.Println("\033[31m[!] ERROR: \n\033[33m" + err.Error() + "\033[0m")
+		os.Exit(1)
+	}
 	if cookies != "" {
 		req.Header.Set("Cookie", cookies)
 	}
@@ -196,7 +200,7 @@ func request(url, cookies, headers, UserAgent, post string, insecure bool) http.
 	if UserAgent != "" {
 		req.Header.Add("User-Agent", UserAgent)
 	} else {
-		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36")
+		req.Header.Set("User-Agent", "Mozilla/5.0")
 	}
 
 	if headers != "" {
@@ -209,6 +213,9 @@ func request(url, cookies, headers, UserAgent, post string, insecure bool) http.
 	if err != nil {
 		fmt.Println("\033[31m[!] ERROR: \n\033[33m" + err.Error() + "\033[0m")
 		os.Exit(1)
+	}
+	if resp != nil {
+		defer resp.Body.Close()
 	}
 	if resp.StatusCode != 200 {
 		fmt.Println("\033[31m[!] ERROR " + strconv.Itoa(resp.StatusCode) + "\033[0m")

@@ -1,6 +1,6 @@
-module headsek
+module github.com/mmpx12/headsek
 
-go 1.18
+go 1.19
 
 require github.com/mmpx12/optionparser v1.0.4
 

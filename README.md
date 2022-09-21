@@ -44,6 +44,14 @@ headsek -k -H 'Authorization: Token XXXXXXXXXXXXX' https://exemple.com
 
 ### Install:
 
+One liner:
+
+```sh
+go install github.com/mmpx12/headsek
+```
+
+or from source with:
+
 ```sh
 git clone git@github.com:mmpx12/headsek.git
 cd headsek
